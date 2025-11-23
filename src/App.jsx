@@ -29,7 +29,7 @@ const HERO_DATA = {
       id: "OP-SOREL",
       title: "Lightweight ML Malware Detection",
       desc: "Developed an explainable approach for static malware detection using the SOREL-20M dataset. Focused on model transparency and efficiency.",
-      tech: ["Python", "Scikit-learn", "Pandas", "SHAP"],
+      tech: ["Python", "LightGBM", "Pandas", "SHAP"],
       fullDetails: [
         "Utilized the massive SOREL-20M dataset (20 million samples) to train lightweight classifiers.",
         "Prioritized 'Explainable AI' (XAI) to ensure security analysts understand WHY a binary is flagged.",
@@ -41,7 +41,7 @@ const HERO_DATA = {
       id: "OP-GRC-BRIDGE",
       title: "CTI to GRC Integration",
       desc: "Architected a framework to integrate Cyber Threat Intelligence directly into Governance, Risk, and Compliance workflows for real-time risk adaptation.",
-      tech: ["STIX/TAXII", "Python Scripts", "Risk APIs", "ISO 27001"],
+      tech: ["CTI", "GRC", "NIS2", "ISO 27001"],
       fullDetails: [
         "Designed a dynamic bridge between Threat Intel feeds (CTI) and Risk Registers.",
         "Automated the adjustment of risk scores based on active, wild threats rather than static periodic reviews.",
@@ -51,10 +51,11 @@ const HERO_DATA = {
     }
   ],
   gallery: [
-    { id: "IMG_8821", caption: "Stockholm Archipelago Retreat", location: "59.3293° N, 18.0686° E", type: "PERSONAL" },
-    { id: "IMG_9942", caption: "Hackathon Finals 2024", location: "Kista Science City", type: "WORK" },
-    { id: "IMG_1102", caption: "Server Room Maintenance", location: "Data Center Sector 7", type: "WORK" },
-    { id: "IMG_3319", caption: "Escape Room Team Building", location: "Fox in a Box", type: "SOCIAL" }
+    {
+      id: "IMG_8821", src: "photos/pexels-eberhard-grossgasteiger-572897.jpg", caption: "Stockholm Archipelago Retreat", location: "59.3293° N, 18.0686° E", type: "PERSONAL" },
+    { id: "IMG_9942", src: "photos/pexels-eberhard-grossgasteiger-1417647.jpg", caption: "Hackathon Finals 2024", location: "Kista Science City", type: "WORK" },
+    { id: "IMG_1102", src: "photos/pexels-janik-butz-5366526.jpg", caption: "Server Room Maintenance", location: "Data Center Sector 7", type: "WORK" },
+    { id: "IMG_3319", src: "photos/pexels-stein-egil-liland-1933318.jpg", caption: "Escape Room Team Building", location: "Fox in a Box", type: "SOCIAL" }
   ],
   likes: ["Ethical AI", "Escape Rooms", "Clear Documentation", "Puzzles"],
   dislikes: ["Regulatory Non-compliance", "Black Box Models", "Security Theater", "Unpatched Vulnerabilities"]
@@ -300,52 +301,66 @@ const ImageViewer = ({ image, onClose }) => {
         {/* Top Bar */}
         <div className="flex justify-between items-center mb-4 border-b border-green-500/30 pb-2">
           <div className="flex items-center gap-4">
-             <Camera className="text-green-500 animate-pulse" />
-             <div className="text-xs font-mono text-green-400">
-               <span className="opacity-50">FILE_ID:</span> {image.id}
-             </div>
+            <Camera className="text-green-500 animate-pulse" />
+            <div className="text-xs font-mono text-green-400">
+              <span className="opacity-50">FILE_ID:</span> {image.id}
+            </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-green-900/30 rounded-full text-green-500 transition-colors"><X /></button>
         </div>
 
         {/* Image Area */}
         <div className="flex-1 relative bg-gray-900/50 border border-green-900 rounded overflow-hidden group flex items-center justify-center">
-           {/* Simulated Image (Placeholder) */}
-           <div className="w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black flex flex-col items-center justify-center relative overflow-hidden">
-              {/* Scan line animation */}
+
+          {image.src ? (
+            <div className="relative w-full h-full flex items-center justify-center">
+              <img
+                src={image.src}
+                alt={image.caption}
+                className="max-w-full max-h-full object-contain relative z-10"
+              />
+              {/* Scan line overlay */}
+              <div className="absolute inset-0 bg-green-500/5 pointer-events-none mix-blend-overlay z-20"></div>
+              <div className="absolute inset-0 bg-green-500/10 h-1 w-full top-0 animate-[scan_3s_linear_infinite] pointer-events-none z-20"></div>
+            </div>
+          ) : (
+            /* Simulated Image (Placeholder) */
+            <div className="w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black flex flex-col items-center justify-center relative overflow-hidden">
               <div className="absolute inset-0 bg-green-500/10 h-1 w-full top-0 animate-[scan_3s_linear_infinite]"></div>
               <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMWgydjJIMUMxeiIgZmlsbD0iIzIyYzU1ZSIgZmlsbC1vcGFjaXR5PSIwLjEiLz48L3N2Zz4=')] opacity-20"></div>
-              
+
               <Camera size={64} className="text-green-700/50 mb-4" />
               <div className="text-2xl font-bold text-green-700/50 uppercase tracking-widest">Media Encrypted</div>
               <div className="text-xs text-green-800 mt-2 font-mono">Visual data redacted for demo</div>
-           </div>
+              <div className="text-[10px] text-green-900 mt-4">Add 'src' property to display image</div>
+            </div>
+          )}
 
-           {/* HUD Overlays */}
-           <div className="absolute top-4 right-4 flex flex-col gap-2 items-end pointer-events-none">
-             <div className="bg-black/60 px-2 py-1 text-[10px] text-green-400 border border-green-500/30">ISO 800</div>
-             <div className="bg-black/60 px-2 py-1 text-[10px] text-green-400 border border-green-500/30">f/1.8</div>
-             <div className="bg-black/60 px-2 py-1 text-[10px] text-green-400 border border-green-500/30">1/200s</div>
-           </div>
+          {/* HUD Overlays */}
+          <div className="absolute top-4 right-4 flex flex-col gap-2 items-end pointer-events-none z-30">
+            <div className="bg-black/60 px-2 py-1 text-[10px] text-green-400 border border-green-500/30">ISO 800</div>
+            <div className="bg-black/60 px-2 py-1 text-[10px] text-green-400 border border-green-500/30">f/1.8</div>
+            <div className="bg-black/60 px-2 py-1 text-[10px] text-green-400 border border-green-500/30">1/200s</div>
+          </div>
         </div>
 
         {/* Bottom Meta */}
         <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-green-500/30 pt-4 font-mono text-xs">
-           <div>
-             <div className="text-gray-500">CAPTION</div>
-             <div className="text-white font-bold">{image.caption}</div>
-           </div>
-           <div>
-             <div className="text-gray-500">LOCATION</div>
-             <div className="text-cyan-400">{image.location}</div>
-           </div>
-           <div>
-             <div className="text-gray-500">CLASSIFICATION</div>
-             <div className="text-yellow-500">{image.type}</div>
-           </div>
-           <div className="text-right flex justify-end items-end">
-              <div className="text-green-600 animate-pulse">● LIVE VIEW</div>
-           </div>
+          <div>
+            <div className="text-gray-500">CAPTION</div>
+            <div className="text-white font-bold">{image.caption}</div>
+          </div>
+          <div>
+            <div className="text-gray-500">LOCATION</div>
+            <div className="text-cyan-400">{image.location}</div>
+          </div>
+          <div>
+            <div className="text-gray-500">CLASSIFICATION</div>
+            <div className="text-yellow-500">{image.type}</div>
+          </div>
+          <div className="text-right flex justify-end items-end">
+            <div className="text-green-600 animate-pulse">● LIVE VIEW</div>
+          </div>
         </div>
       </div>
     </div>
@@ -440,7 +455,7 @@ const CharacterDetail = ({ onBack, onConfirm }) => {
           </div>
 
           <div className="mb-8">
-             <h4 className="text-cyan-400 text-xs font-bold uppercase mb-4 flex items-center gap-2 border-b border-gray-800 pb-2"><FileText size={14} /> Mission Log / Recent Operations</h4>
+             <h4 className="text-cyan-400 text-xs font-bold uppercase mb-4 flex items-center gap-2 border-b border-gray-800 pb-2"><FileText size={14} /> Recent Operations</h4>
              <p className="text-[10px] text-gray-500 mb-2 italic text-right">Click to inspect file...</p>
              <div className="grid grid-cols-1 gap-4">
                 {HERO_DATA.missions.map((mission, i) => (
