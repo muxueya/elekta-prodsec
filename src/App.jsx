@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Shield, Terminal, Cpu, Wifi, Lock, User, Zap, AlertTriangle, CheckCircle, Code, Coffee, Bug, Scale, Brain, FileText, Search, X, Database, Share2, Activity, Camera, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Shield, Terminal, Cpu, Wifi, Lock, User, Zap, AlertTriangle, CheckCircle, Code, Coffee, Bug, Scale, Brain, FileText, Search, X, Database, Share2, Activity, Camera, Maximize2, RefreshCw } from 'lucide-react';
 
 // ==========================================
 // 🔧 CUSTOMIZE YOUR PROFILE HERE
 // ==========================================
 const HERO_DATA = {
   id: 'hero',
-  name: "JIALEI 'EMMA' QIAN", 
-  role: "PRODUCT SECURITY ENGINEER", 
+  name: "JIALEI 'EMMA' QIAN",
+  role: "PRODUCT SECURITY ENGINEER",
   clearance: "LEVEL 5 (CLASSIFIED)",
   status: "ONLINE",
   avatarColor: "text-cyan-400",
@@ -51,8 +51,7 @@ const HERO_DATA = {
     }
   ],
   gallery: [
-    {
-      id: "IMG_8821", src: "photos/pexels-eberhard-grossgasteiger-572897.jpg", caption: "Stockholm Archipelago Retreat", location: "59.3293° N, 18.0686° E", type: "PERSONAL" },
+    { id: "IMG_8821", src: "photos/pexels-eberhard-grossgasteiger-572897.jpg", caption: "Stockholm Archipelago Retreat", location: "59.3293° N, 18.0686° E", type: "PERSONAL" },
     { id: "IMG_9942", src: "photos/pexels-eberhard-grossgasteiger-1417647.jpg", caption: "Hackathon Finals 2024", location: "Kista Science City", type: "WORK" },
     { id: "IMG_1102", src: "photos/pexels-janik-butz-5366526.jpg", caption: "Server Room Maintenance", location: "Data Center Sector 7", type: "WORK" },
     { id: "IMG_3319", src: "photos/pexels-stein-egil-liland-1933318.jpg", caption: "Escape Room Team Building", location: "Fox in a Box", type: "SOCIAL" }
@@ -73,8 +72,8 @@ const AnimeAvatar = ({ size = "full" }) => (
           <stop offset="1" stopColor="#94A3B8" />
         </linearGradient>
         <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-           <feGaussianBlur stdDeviation="2" result="blur" />
-           <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
       </defs>
       <path d="M50 70 C30 90 30 160 45 180 C55 200 145 200 155 180 C170 160 170 90 150 70" fill="url(#hairGradient)" />
@@ -99,28 +98,28 @@ const AnimeAvatar = ({ size = "full" }) => (
 // ==========================================
 
 const App = () => {
-  const [gameState, setGameState] = useState('BOOT'); // BOOT, INTRO, SELECT, DETAIL, FINAL
-  
-  useEffect(() => {
-    const timer = setTimeout(() => setGameState('INTRO'), 2500);
-    return () => clearTimeout(timer);
-  }, []);
+  const [gameState, setGameState] = useState('CHAOS'); // Changed from BOOT to CHAOS to start animation first
+
+  const handleRestart = () => {
+    setGameState('CHAOS');
+  };
 
   return (
     <div className="min-h-screen bg-black text-green-500 font-mono overflow-hidden selection:bg-green-900 selection:text-white relative">
       <div className="pointer-events-none fixed inset-0 z-50 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] pointer-events-none"></div>
       <div className="pointer-events-none fixed inset-0 z-40 animate-pulse opacity-5 bg-white mix-blend-overlay"></div>
 
-      {gameState === 'BOOT' && <BootSequence />}
+      {gameState === 'CHAOS' && <ChaosIntro onComplete={() => setGameState('BOOT')} />}
+      {gameState === 'BOOT' && <BootSequence onComplete={() => setGameState('INTRO')} />}
       {gameState === 'INTRO' && <IntroScreen onStart={() => setGameState('SELECT')} />}
       {gameState === 'SELECT' && <SelectionScreen onSelect={() => setGameState('DETAIL')} />}
       {gameState === 'DETAIL' && <CharacterDetail onBack={() => setGameState('SELECT')} onConfirm={() => setGameState('FINAL')} />}
-      {gameState === 'FINAL' && <WelcomeScreen />}
-      
+      {gameState === 'FINAL' && <WelcomeScreen onRestart={handleRestart} />}
+
       <div className="fixed inset-0 z-0 opacity-20 pointer-events-none">
-         <div className="absolute top-10 left-10 animate-bounce"><Wifi size={48} /></div>
-         <div className="absolute bottom-20 right-20 animate-pulse"><Lock size={64} /></div>
-         <div className="absolute top-1/2 left-1/4 animate-ping"><Cpu size={32} /></div>
+        <div className="absolute top-10 left-10 animate-bounce"><Wifi size={48} /></div>
+        <div className="absolute bottom-20 right-20 animate-pulse"><Lock size={64} /></div>
+        <div className="absolute top-1/2 left-1/4 animate-ping"><Cpu size={32} /></div>
       </div>
     </div>
   );
@@ -130,7 +129,121 @@ const App = () => {
 // 🖥️ SUB-COMPONENTS
 // ==========================================
 
-const BootSequence = () => {
+const ChaosIntro = ({ onComplete }) => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas size
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Config
+    const particles = [];
+    const textMain = "ELEKTA";
+    const textSub = "PRODSEC";
+    const spread = 2000; // How far they start scattered
+
+    // 1. Create off-screen canvas to sample text coordinates
+    const offCanvas = document.createElement('canvas');
+    offCanvas.width = canvas.width;
+    offCanvas.height = canvas.height;
+    const offCtx = offCanvas.getContext('2d');
+
+    offCtx.font = "900 80px monospace";
+    if (canvas.width < 768) offCtx.font = "900 40px monospace"; // Mobile responsive
+    offCtx.textAlign = "center";
+    offCtx.textBaseline = "middle";
+    offCtx.fillStyle = "#FFFFFF";
+
+    // Draw text in center
+    offCtx.fillText(textMain, canvas.width / 2, canvas.height / 2 - 40);
+    offCtx.font = "700 40px monospace";
+    if (canvas.width < 768) offCtx.font = "700 20px monospace";
+    offCtx.fillText(textSub, canvas.width / 2, canvas.height / 2 + 40);
+
+    // 2. Scan pixel data to find target positions
+    const pData = offCtx.getImageData(0, 0, canvas.width, canvas.height).data;
+    const targets = [];
+
+    // Sampling rate to prevent too many points
+    const step = 4;
+    for (let y = 0; y < canvas.height; y += step) {
+      for (let x = 0; x < canvas.width; x += step) {
+        if (pData[(y * canvas.width + x) * 4 + 3] > 128) {
+          targets.push({ x, y });
+        }
+      }
+    }
+
+    // 3. Initialize particles
+    for (let i = 0; i < targets.length; i++) {
+      // Start from random chaos
+      particles.push({
+        x: Math.random() * spread - spread / 2 + canvas.width / 2,
+        y: Math.random() * spread - spread / 2 + canvas.height / 2,
+        targetX: targets[i].x,
+        targetY: targets[i].y,
+        val: Math.random() > 0.5 ? '1' : '0', // Decimals 1 and 0
+        speed: 0.03 + Math.random() * 0.05
+      });
+    }
+
+    // Animation Loop
+    let animationFrameId;
+    let progress = 0;
+
+    const animate = () => {
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      let allSettled = true;
+
+      ctx.fillStyle = "#4ade80"; // Green color
+      ctx.font = "12px monospace";
+
+      particles.forEach(p => {
+        // Lerp towards target
+        const dx = p.targetX - p.x;
+        const dy = p.targetY - p.y;
+
+        p.x += dx * p.speed;
+        p.y += dy * p.speed;
+
+        // Randomly flick value
+        if (Math.random() > 0.95) p.val = Math.random() > 0.5 ? '1' : '0';
+
+        // Draw
+        ctx.fillText(p.val, p.x, p.y);
+
+        // Check if close enough
+        if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+          allSettled = false;
+        }
+      });
+
+      progress++;
+
+      if (!allSettled && progress < 300) {
+        animationFrameId = requestAnimationFrame(animate);
+      } else {
+        // Pause briefly when formed, then finish
+        setTimeout(onComplete, 1500);
+      }
+    };
+
+    animate();
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, []);
+
+  return <canvas ref={canvasRef} className="fixed inset-0 z-50 bg-black cursor-none" />;
+};
+
+const BootSequence = ({ onComplete }) => {
   const [lines, setLines] = useState([]);
   const bootText = [
     "INITIALIZING PRODSEC KERNEL...",
@@ -148,6 +261,10 @@ const BootSequence = () => {
         setLines(prev => [...prev, text]);
       }, delay);
     });
+
+    // Auto transition after last line + buffer
+    setTimeout(onComplete, 4000);
+
   }, []);
 
   return (
@@ -160,19 +277,22 @@ const BootSequence = () => {
   );
 };
 
+// ... Rest of the components (IntroScreen, SelectionScreen, etc.) remain unchanged ...
+// They are included in the full App flow above.
+
 const IntroScreen = ({ onStart }) => (
   <div className="h-screen flex flex-col items-center justify-center relative z-10">
     <div className="border-2 border-green-500 p-2 mb-8 animate-pulse">
       <div className="bg-green-500 text-black px-4 py-1 font-bold text-xs tracking-widest">ELEKTA_SECURE_TERMINAL_V4.0</div>
     </div>
-    
+
     <h1 className="text-5xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-500 tracking-tighter mb-2 relative group cursor-default">
       <span className="absolute -inset-1 blur opacity-30 bg-green-400 group-hover:opacity-60 transition-opacity duration-500"></span>
       ELEKTA: PRODSEC
     </h1>
     <p className="text-green-700 tracking-[0.5em] text-sm md:text-xl mb-12 uppercase font-bold">Product Security Onboarding</p>
 
-    <button 
+    <button
       onClick={onStart}
       className="group relative px-8 py-4 bg-black border border-green-500 hover:bg-green-900/30 transition-all duration-300 outline-none focus:ring-2 focus:ring-green-400"
     >
@@ -194,8 +314,8 @@ const SelectionScreen = ({ onSelect }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full">
         <LockedCard id="01" label="OFFLINE" />
-        
-        <div 
+
+        <div
           onClick={onSelect}
           className="relative group cursor-pointer transform hover:-translate-y-2 transition-all duration-300"
         >
@@ -203,7 +323,7 @@ const SelectionScreen = ({ onSelect }) => {
           <div className="relative h-96 bg-black border border-cyan-500/50 flex flex-col items-center p-6 overflow-hidden">
             <div className="absolute top-0 left-0 bg-cyan-500 text-black text-xs px-2 py-1 font-bold">NEW SIGNAL</div>
             <div className="w-full h-full border border-cyan-900/30 absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(6,182,212,0.05)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%,100%_100%] animate-[gradient_3s_linear_infinite]"></div>
-            
+
             <div className="mt-10 mb-6 relative">
               <div className="w-32 h-32 rounded-full border-2 border-cyan-400 flex items-center justify-center bg-cyan-900/20 group-hover:bg-cyan-900/40 transition-colors p-1">
                 <AnimeAvatar size="small" />
@@ -225,7 +345,7 @@ const SelectionScreen = ({ onSelect }) => {
                 <div className="h-full bg-cyan-400 w-full animate-[load_2s_ease-in-out]"></div>
               </div>
             </div>
-            
+
             <div className="mt-4 text-center w-full py-2 border border-cyan-500/30 text-cyan-400 text-sm group-hover:bg-cyan-400 group-hover:text-black transition-colors font-bold">
               VIEW DOSSIER
             </div>
@@ -258,35 +378,35 @@ const ProjectModal = ({ mission, onClose }) => {
       <div className="w-full max-w-2xl bg-gray-900 border-2 border-cyan-500/50 shadow-[0_0_100px_rgba(6,182,212,0.2)] relative overflow-hidden flex flex-col max-h-[90vh]">
         <div className="bg-cyan-900/20 p-4 border-b border-cyan-500/30 flex justify-between items-center">
           <div className="flex items-center gap-3">
-             <Database className="text-cyan-400" size={20} />
-             <div>
-               <div className="text-cyan-400 text-xs font-bold tracking-widest uppercase">Project File Decrypted</div>
-               <div className="text-white font-bold text-lg leading-none">{mission.id}</div>
-             </div>
+            <Database className="text-cyan-400" size={20} />
+            <div>
+              <div className="text-cyan-400 text-xs font-bold tracking-widest uppercase">Project File Decrypted</div>
+              <div className="text-white font-bold text-lg leading-none">{mission.id}</div>
+            </div>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-white hover:bg-red-500/20 p-2 rounded transition-colors"><X size={24} /></button>
         </div>
         <div className="p-6 overflow-y-auto custom-scrollbar">
-           <h2 className="text-2xl font-bold text-white mb-4">{mission.title}</h2>
-           <div className="flex flex-wrap gap-2 mb-6">
-             {mission.tech.map((t, i) => <span key={i} className="px-2 py-1 bg-cyan-900/40 border border-cyan-500/30 text-cyan-300 text-xs rounded">{t}</span>)}
-           </div>
-           <div className="space-y-4">
-             <div className="bg-black/50 p-4 border-l-2 border-green-500">
-               <h4 className="text-green-500 text-xs uppercase font-bold mb-2 flex items-center gap-2"><Activity size={14} /> Operational Objective</h4>
-               <p className="text-gray-300 text-sm">{mission.desc}</p>
-             </div>
-             <div>
-               <h4 className="text-gray-400 text-xs uppercase font-bold mb-3 border-b border-gray-800 pb-1">Execution Details</h4>
-               <ul className="space-y-3">
-                 {mission.fullDetails.map((detail, i) => <li key={i} className="flex gap-3 text-gray-300 text-sm"><span className="text-cyan-500 mt-1">➤</span><span>{detail}</span></li>)}
-               </ul>
-             </div>
-           </div>
+          <h2 className="text-2xl font-bold text-white mb-4">{mission.title}</h2>
+          <div className="flex flex-wrap gap-2 mb-6">
+            {mission.tech.map((t, i) => <span key={i} className="px-2 py-1 bg-cyan-900/40 border border-cyan-500/30 text-cyan-300 text-xs rounded">{t}</span>)}
+          </div>
+          <div className="space-y-4">
+            <div className="bg-black/50 p-4 border-l-2 border-green-500">
+              <h4 className="text-green-500 text-xs uppercase font-bold mb-2 flex items-center gap-2"><Activity size={14} /> Operational Objective</h4>
+              <p className="text-gray-300 text-sm">{mission.desc}</p>
+            </div>
+            <div>
+              <h4 className="text-gray-400 text-xs uppercase font-bold mb-3 border-b border-gray-800 pb-1">Execution Details</h4>
+              <ul className="space-y-3">
+                {mission.fullDetails.map((detail, i) => <li key={i} className="flex gap-3 text-gray-300 text-sm"><span className="text-cyan-500 mt-1">➤</span><span>{detail}</span></li>)}
+              </ul>
+            </div>
+          </div>
         </div>
         <div className="p-4 border-t border-gray-800 bg-black/40 flex justify-end gap-4">
-           <button className="px-4 py-2 border border-gray-700 text-gray-400 text-xs hover:bg-gray-800 transition-colors flex items-center gap-2"><Share2 size={14} /> SHARE REPORT</button>
-           <button onClick={onClose} className="px-6 py-2 bg-cyan-600 hover:bg-cyan-500 text-black font-bold text-xs transition-colors">CLOSE FILE</button>
+          <button className="px-4 py-2 border border-gray-700 text-gray-400 text-xs hover:bg-gray-800 transition-colors flex items-center gap-2"><Share2 size={14} /> SHARE REPORT</button>
+          <button onClick={onClose} className="px-6 py-2 bg-cyan-600 hover:bg-cyan-500 text-black font-bold text-xs transition-colors">CLOSE FILE</button>
         </div>
       </div>
     </div>
@@ -373,7 +493,7 @@ const CharacterDetail = ({ onBack, onConfirm }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 md:p-8 relative z-20 overflow-y-auto">
-      
+
       {/* Modals */}
       {selectedMission && <ProjectModal mission={selectedMission} onClose={() => setSelectedMission(null)} />}
       {selectedImage && <ImageViewer image={selectedImage} onClose={() => setSelectedImage(null)} />}
@@ -383,32 +503,32 @@ const CharacterDetail = ({ onBack, onConfirm }) => {
       </button>
 
       <div className="w-full max-w-6xl bg-black/90 border border-gray-800 flex flex-col md:flex-row shadow-[0_0_50px_rgba(16,185,129,0.1)] mt-12 md:mt-0">
-        
+
         {/* Left Column: Visuals */}
         <div className="md:w-1/3 border-b md:border-b-0 md:border-r border-gray-800 p-8 flex flex-col items-center relative">
           <div className="absolute top-0 left-0 p-2 opacity-50"><Code size={120} className="text-gray-900 absolute -top-4 -left-4 rotate-12" /></div>
           <div className={`w-48 h-48 rounded-full border-4 border-double border-gray-700 flex items-center justify-center bg-gray-900/50 mb-6 relative overflow-hidden group p-1`}>
-             <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/40 to-transparent"></div>
-             <AnimeAvatar />
-             <div className="absolute w-full h-1 bg-cyan-400/30 top-0 animate-[scan_2s_linear_infinite]"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/40 to-transparent"></div>
+            <AnimeAvatar />
+            <div className="absolute w-full h-1 bg-cyan-400/30 top-0 animate-[scan_2s_linear_infinite]"></div>
           </div>
           <h2 className="text-3xl font-bold text-white text-center uppercase">{HERO_DATA.name}</h2>
           <div className="text-cyan-400 font-mono text-sm mt-1">{HERO_DATA.role}</div>
           <div className="px-3 py-1 rounded-full border border-green-500/50 text-green-400 text-xs mt-4 bg-green-900/20">CLEARANCE: {HERO_DATA.clearance}</div>
           <div className="mt-8 w-full">
-             <h4 className="text-gray-500 text-xs uppercase tracking-widest mb-3 border-b border-gray-800 pb-1">Core Traits</h4>
-             <div className="grid grid-cols-2 gap-2">
-               {HERO_DATA.traits.map((Trait, i) => <div key={i} className="flex items-center gap-2 text-xs text-gray-300 bg-gray-900/50 p-2 rounded border border-gray-800"><Trait.icon size={14} className="text-cyan-400" /><span>{Trait.text}</span></div>)}
-             </div>
+            <h4 className="text-gray-500 text-xs uppercase tracking-widest mb-3 border-b border-gray-800 pb-1">Core Traits</h4>
+            <div className="grid grid-cols-2 gap-2">
+              {HERO_DATA.traits.map((Trait, i) => <div key={i} className="flex items-center gap-2 text-xs text-gray-300 bg-gray-900/50 p-2 rounded border border-gray-800"><Trait.icon size={14} className="text-cyan-400" /><span>{Trait.text}</span></div>)}
+            </div>
           </div>
           {/* Gallery Preview (Mobile/Small) */}
           <div className="mt-8 w-full md:hidden">
-             <h4 className="text-green-400 text-xs font-bold uppercase mb-3 flex items-center gap-2"><Camera size={14} /> Media Archive</h4>
-             <div className="grid grid-cols-4 gap-2">
-               {HERO_DATA.gallery.map((img, i) => (
-                 <div key={i} onClick={() => setSelectedImage(img)} className="aspect-square bg-gray-800 border border-gray-700 hover:border-green-500 cursor-pointer flex items-center justify-center text-gray-600 hover:text-green-400 transition-colors"><Maximize2 size={12} /></div>
-               ))}
-             </div>
+            <h4 className="text-green-400 text-xs font-bold uppercase mb-3 flex items-center gap-2"><Camera size={14} /> Media Archive</h4>
+            <div className="grid grid-cols-4 gap-2">
+              {HERO_DATA.gallery.map((img, i) => (
+                <div key={i} onClick={() => setSelectedImage(img)} className="aspect-square bg-gray-800 border border-gray-700 hover:border-green-500 cursor-pointer flex items-center justify-center text-gray-600 hover:text-green-400 transition-colors"><Maximize2 size={12} /></div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -420,53 +540,59 @@ const CharacterDetail = ({ onBack, onConfirm }) => {
           </div>
           <p className="text-gray-300 font-mono text-sm leading-relaxed mb-8 border-l-2 border-green-500 pl-4">{HERO_DATA.bio}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-8">
-             {HERO_DATA.stats.map((stat, i) => (
-               <div key={i}>
-                 <div className="flex justify-between text-xs mb-1"><span className="text-gray-400 uppercase">{stat.label}</span><span className="text-white">{stat.value}%</span></div>
-                 <div className="h-2 bg-gray-800 rounded-full overflow-hidden"><div className={`h-full ${stat.color} transition-all duration-1000 ease-out`} style={{ width: `${stat.value}%` }}></div></div>
-               </div>
-             ))}
+            {HERO_DATA.stats.map((stat, i) => (
+              <div key={i}>
+                <div className="flex justify-between text-xs mb-1"><span className="text-gray-400 uppercase">{stat.label}</span><span className="text-white">{stat.value}%</span></div>
+                <div className="h-2 bg-gray-800 rounded-full overflow-hidden"><div className={`h-full ${stat.color} transition-all duration-1000 ease-out`} style={{ width: `${stat.value}%` }}></div></div>
+              </div>
+            ))}
           </div>
 
           {/* Gallery Grid (Desktop) */}
           <div className="mb-8 hidden md:block">
-             <h4 className="text-cyan-400 text-xs font-bold uppercase mb-4 flex items-center gap-2 border-b border-gray-800 pb-2">
-               <Camera size={14} /> Surveillance / Media Archive
-             </h4>
-             <div className="grid grid-cols-4 gap-4">
-               {HERO_DATA.gallery.map((img, i) => (
-                 <div 
-                   key={i} 
-                   onClick={() => setSelectedImage(img)}
-                   className="aspect-square relative bg-gray-900 border border-gray-700 group cursor-pointer overflow-hidden hover:border-green-500 transition-colors"
-                 >
-                   {/* Placeholder visuals */}
-                   <div className="absolute inset-0 flex flex-col items-center justify-center p-2 text-center">
-                     <div className="text-[10px] text-gray-600 font-mono mb-1">{img.id}</div>
-                     <Maximize2 size={20} className="text-gray-600 group-hover:text-green-400 group-hover:scale-110 transition-all" />
-                   </div>
-                   {/* Overlay details on hover */}
-                   <div className="absolute inset-0 bg-green-900/90 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                     <span className="text-green-400 text-[10px] font-bold tracking-wider uppercase px-2 text-center">{img.type}</span>
-                   </div>
-                 </div>
-               ))}
-             </div>
+            <h4 className="text-cyan-400 text-xs font-bold uppercase mb-4 flex items-center gap-2 border-b border-gray-800 pb-2">
+              <Camera size={14} /> Surveillance / Media Archive
+            </h4>
+            <div className="grid grid-cols-4 gap-4">
+              {HERO_DATA.gallery.map((img, i) => (
+                <div
+                  key={i}
+                  onClick={() => setSelectedImage(img)}
+                  className="aspect-square relative bg-gray-900 border border-gray-700 group cursor-pointer overflow-hidden hover:border-green-500 transition-colors"
+                >
+                  {/* Placeholder visuals */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-2 text-center">
+                    {img.src ? (
+                      <img src={img.src} alt={img.id} className="w-full h-full object-cover opacity-50 group-hover:opacity-80 transition-opacity" />
+                    ) : (
+                      <>
+                        <div className="text-[10px] text-gray-600 font-mono mb-1">{img.id}</div>
+                        <Maximize2 size={20} className="text-gray-600 group-hover:text-green-400 group-hover:scale-110 transition-all" />
+                      </>
+                    )}
+                  </div>
+                  {/* Overlay details on hover */}
+                  <div className="absolute inset-0 bg-green-900/90 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <span className="text-green-400 text-[10px] font-bold tracking-wider uppercase px-2 text-center">{img.type}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="mb-8">
-             <h4 className="text-cyan-400 text-xs font-bold uppercase mb-4 flex items-center gap-2 border-b border-gray-800 pb-2"><FileText size={14} /> Recent Operations</h4>
-             <p className="text-[10px] text-gray-500 mb-2 italic text-right">Click to inspect file...</p>
-             <div className="grid grid-cols-1 gap-4">
-                {HERO_DATA.missions.map((mission, i) => (
-                  <button key={i} onClick={() => setSelectedMission(mission)} className="bg-gray-900/40 border border-gray-700 p-4 hover:border-cyan-500 hover:bg-cyan-900/10 transition-all duration-300 group text-left relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-cyan-500 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></div>
-                    <div className="flex justify-between items-center mb-1"><span className="text-green-400 font-bold text-xs tracking-wider group-hover:text-cyan-400">{mission.id}</span><span className="text-[10px] text-gray-500 border border-gray-700 px-1 rounded flex items-center gap-1"><Database size={10} /> INSPECT</span></div>
-                    <h5 className="text-white font-bold text-sm mb-2 group-hover:text-cyan-300 transition-colors">{mission.title}</h5>
-                    <p className="text-gray-400 text-xs leading-relaxed line-clamp-2">{mission.desc}</p>
-                  </button>
-                ))}
-             </div>
+            <h4 className="text-cyan-400 text-xs font-bold uppercase mb-4 flex items-center gap-2 border-b border-gray-800 pb-2"><FileText size={14} /> Recent Operations</h4>
+            <p className="text-[10px] text-gray-500 mb-2 italic text-right">Click to inspect file...</p>
+            <div className="grid grid-cols-1 gap-4">
+              {HERO_DATA.missions.map((mission, i) => (
+                <button key={i} onClick={() => setSelectedMission(mission)} className="bg-gray-900/40 border border-gray-700 p-4 hover:border-cyan-500 hover:bg-cyan-900/10 transition-all duration-300 group text-left relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-cyan-500 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></div>
+                  <div className="flex justify-between items-center mb-1"><span className="text-green-400 font-bold text-xs tracking-wider group-hover:text-cyan-400">{mission.id}</span><span className="text-[10px] text-gray-500 border border-gray-700 px-1 rounded flex items-center gap-1"><Database size={10} /> INSPECT</span></div>
+                  <h5 className="text-white font-bold text-sm mb-2 group-hover:text-cyan-300 transition-colors">{mission.title}</h5>
+                  <p className="text-gray-400 text-xs leading-relaxed line-clamp-2">{mission.desc}</p>
+                </button>
+              ))}
+            </div>
           </div>
 
           <button onClick={onConfirm} className="mt-auto w-full bg-green-600 hover:bg-green-500 text-black font-bold py-4 uppercase tracking-widest transition-colors flex items-center justify-center gap-3 group"><Zap size={20} className="group-hover:text-white transition-colors" /> Confirm Recruitment</button>
@@ -476,12 +602,20 @@ const CharacterDetail = ({ onBack, onConfirm }) => {
   );
 };
 
-const WelcomeScreen = () => (
+const WelcomeScreen = ({ onRestart }) => (
   <div className="h-screen flex flex-col items-center justify-center z-20 relative text-center p-4">
     <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mb-6 animate-bounce"><CheckCircle size={48} className="text-black" /></div>
     <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">WELCOME TO THE TEAM</h1>
-    <p className="text-green-400 font-mono max-w-xl">Credentials verified. Workspace initialized. <br/> Let's build something secure.</p>
-    <div className="mt-12 p-4 border border-green-900 bg-black/80 text-xs text-gray-500 font-mono">SESSION_ID: {Math.random().toString(36).substr(2, 9).toUpperCase()} <br/> TIMESTAMP: {new Date().toISOString()}</div>
+    <p className="text-green-400 font-mono max-w-xl">Credentials verified. Workspace initialized. <br /> Let's build something secure.</p>
+    <div className="mt-12 p-4 border border-green-900 bg-black/80 text-xs text-gray-500 font-mono mb-8">SESSION_ID: {Math.random().toString(36).substr(2, 9).toUpperCase()} <br /> TIMESTAMP: {new Date().toISOString()}</div>
+
+    <button
+      onClick={onRestart}
+      className="group flex items-center gap-2 text-green-500 hover:text-white transition-colors uppercase text-sm tracking-widest"
+    >
+      <RefreshCw size={16} className="group-hover:rotate-180 transition-transform duration-500" />
+      System Reboot
+    </button>
   </div>
 );
 
